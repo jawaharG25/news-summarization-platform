@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --color-glass-base: rgba(30, 41, 59, 0.4);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+  --color-glass-highlight: rgba(255, 255, 255, 0.05);
+
+  --color-bias-left: #3b82f6; /* Blue */
+  --color-bias-center: #a855f7; /* Purple */
+  --color-bias-right: #ef4444; /* Red */
+}
+
+/* Custom Utilities for Glassmorphism */
+@layer utilities {
+  .glass-panel {
+    @apply bg-glass-base backdrop-blur-xl border border-glass-border rounded-2xl shadow-2xl;
+  }
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased overflow-x-hidden;
+  margin: 0;
+  min-height: 100vh;
+  /* Add a subtle radial gradient for premium feel */
+  background-image: radial-gradient(circle at 50% -20%, rgba(168, 85, 247, 0.15), transparent 50%);
+}
+
+#root {
+  @apply min-h-screen w-full flex flex-col;
+}
