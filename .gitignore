@@ -44,4 +44,6 @@ client/build/
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+# Puppeteer temp data
+.puppeteer_data/
+server/.puppeteer_data/

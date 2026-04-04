@@ -35,7 +35,7 @@ async function analyzeArticle(title, content) {
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -48,8 +48,26 @@ async function analyzeArticle(title, content) {
 
   } catch (err) {
     console.error("AI Analysis Failed:", err);
-    throw new Error("Failed to analyze article with AI.");
+    throw new Error("Failed to analyze article with AI. " + err.message);
   }
 }
 
-module.exports = { analyzeArticle };
+async function generateEmbedding(text) {
+  if (!ai) {
+    console.warn("No GEMINI_API_KEY found. Returning mock embedding.");
+    return Array(768).fill(0); // Mock 768-dimensional vector
+  }
+  
+  try {
+    const response = await ai.models.embedContent({
+      model: 'gemini-embedding-001',
+      contents: text
+    });
+    return response.embeddings[0].values;
+  } catch (err) {
+    console.error("AI Embedding Failed:", err);
+    throw new Error("Failed to generate embedding.");
+  }
+}
+
+module.exports = { analyzeArticle, generateEmbedding };

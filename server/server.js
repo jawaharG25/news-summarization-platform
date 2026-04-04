@@ -12,7 +12,9 @@ app.use(express.json());
 
 // Routes
 const scanRoutes = require('./routes/scan');
+const analyticsRoutes = require('./routes/analytics');
 app.use('/api', scanRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/news-prediction', {

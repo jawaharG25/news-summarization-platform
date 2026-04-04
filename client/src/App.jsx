@@ -5,9 +5,11 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import DataSphere from './components/3d/DataSphere'
 import BiasSpectrum from './components/BiasSpectrum'
 import Archive from './components/Archive'
+import AnalyticsDashboard from './components/AnalyticsDashboard'
+import RecommendationList from './components/RecommendationList'
 
 function App() {
-  const [currentView, setCurrentView] = useState('scan') // 'scan' | 'archive'
+  const [currentView, setCurrentView] = useState('scan') // 'scan' | 'archive' | 'analytics'
   const [url, setUrl] = useState('')
   const [isScanning, setIsScanning] = useState(false)
 
@@ -97,6 +99,12 @@ function App() {
           >
             Archive
           </button>
+          <button 
+            onClick={() => setCurrentView('analytics')}
+            className={`font-semibold transition-colors ${currentView === 'analytics' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            Analytics
+          </button>
         </div>
       </div>
 
@@ -165,6 +173,7 @@ function App() {
                   <BiasSpectrum score={scanResult.biasScore} />
                 </div>
               </div>
+              <RecommendationList currentArticleId={scanResult._id} onSelectArticle={handleSelectArchivedArticle} />
             </div>
           ) : (
             <div className="glass-panel p-8 w-full max-w-2xl opacity-50">
@@ -173,8 +182,10 @@ function App() {
             </div>
           )}
         </div>
-      ) : (
+      ) : currentView === 'archive' ? (
         <Archive articles={archivedArticles} onSelectArticle={handleSelectArchivedArticle} />
+      ) : (
+        <AnalyticsDashboard />
       )}
     </div>
   )

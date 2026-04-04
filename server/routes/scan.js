@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { scrapeArticle } = require('../services/scraper');
-const { analyzeArticle } = require('../services/ai');
+const { analyzeArticle, generateEmbedding } = require('../services/ai');
 const Article = require('../models/Article');
 
 // @route POST /api/scan
@@ -63,20 +63,82 @@ router.get('/archive', async (req, res) => {
 });
 
 // @route GET /api/recommendations/:id
-// @desc Get simple recommendations based on shared words in title/summary
+// @desc Get 5 related articles (Atlas Vector Search primary, Keyword Fallback secondary)
 router.get('/recommendations/:id', async (req, res) => {
   try {
     const source = await Article.findById(req.params.id);
     if (!source) return res.status(404).json({ error: 'Article not found' });
 
-    // A completely rudimentary match logic (instead of Vector Search for simplicity in MVP)
-    // We get other articles and randomize or just return recent ones.
-    // In a full implementation, you'd use Atlas Vector Search.
-    const recommendations = await Article.find({ _id: { $ne: source._id } }).limit(3).select('title url biasScore');
+    const summaryText = source.summary.join(' ');
+
+    // 1. Generate Vector Embedding using Gemini
+    const embedding = await generateEmbedding(summaryText);
     
-    res.json({ data: recommendations });
+    // Optional: save it back to the document if not present
+    if (!source.embedding || source.embedding.length === 0) {
+      source.embedding = embedding;
+      await source.save();
+    }
+
+    // 2. Vector Search Pipeline
+    let results = [];
+    try {
+      const vectorPipeline = [
+        {
+          $vectorSearch: {
+            index: 'vector_index', 
+            path: 'embedding',
+            queryVector: embedding,
+            numCandidates: 100,
+            limit: 6 
+          }
+        },
+        {
+          $match: { _id: { $ne: source._id } }
+        },
+        {
+          $project: { title: 1, url: 1, biasScore: 1, summary: 1, score: { $meta: 'vectorSearchScore' } }
+        },
+        {
+          $limit: 5
+        }
+      ];
+      
+      results = await Article.aggregate(vectorPipeline);
+      console.log(`Vector Search found ${results.length} related articles.`);
+    } catch (vectorErr) {
+      console.error("Vector Search failed (fallback active):", vectorErr.message);
+      
+      // 3. Fallback: Keyword-based matching
+      const words = summaryText.split(/\s+/).filter(w => w.length > 5);
+      const regexPattern = new RegExp(words.join('|'), 'i');
+
+      results = await Article.find({
+        _id: { $ne: source._id },
+        $or: [
+          { title: { $regex: regexPattern } },
+          { summary: { $regex: regexPattern } }
+        ]
+      })
+      .limit(5)
+      .select('title url biasScore summary');
+    }
+
+    // Pad with recent if needed
+    if (results.length < 5) {
+      const more = await Article.find({
+        _id: { $nin: [source._id, ...results.map(r => r._id)] }
+      })
+      .sort({ timestamp: -1 })
+      .limit(5 - results.length)
+      .select('title url biasScore summary');
+      results = results.concat(more);
+    }
+    
+    res.json({ data: results });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('Recommendation Error:', err);
+    res.status(500).json({ error: 'Server error fetching recommendations' });
   }
 });
 

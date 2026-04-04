@@ -26,6 +26,10 @@ const articleSchema = new mongoose.Schema({
     type: Number, // 0 to 100 (0=Left, 50=Center, 100=Right)
     required: true
   },
+  embedding: {
+    type: [Number], // For Vector Search later
+    required: false
+  },
   timestamp: {
     type: Date,
     default: Date.now
