@@ -10,7 +10,7 @@ export default function RecommendationList({ currentArticleId, onSelectArticle }
     if (!currentArticleId) return;
 
     setLoading(true);
-    fetch(`http://localhost:5000/api/recommendations/${currentArticleId}`)
+    fetch(`https://newslens-core-api.azurewebsites.net/api/recommendations/${currentArticleId}`)
       .then(res => res.json())
       .then(data => {
         if (data && data.data) {

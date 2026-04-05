@@ -12,7 +12,7 @@ export default function AnalyticsDashboard() {
 
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/api/analytics')
+    fetch('https://newslens-core-api.azurewebsites.net/api/analytics')
       .then(res => res.json())
       .then(result => {
         if (result.data) {

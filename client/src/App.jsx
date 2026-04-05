@@ -21,7 +21,7 @@ function App() {
   // Fetch archive data when switching to archive view
   useEffect(() => {
     if (currentView === 'archive') {
-      fetch('http://localhost:5000/api/archive')
+      fetch('https://newslens-core-api.azurewebsites.net/api/archive')
         .then(res => res.json())
         .then(data => {
           if (data && data.data) {
@@ -37,7 +37,7 @@ function App() {
     setIsScanning(true)
     setError('')
     try {
-      const response = await fetch('http://localhost:5000/api/scan', {
+      const response = await fetch('https://newslens-core-api.azurewebsites.net/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url })
