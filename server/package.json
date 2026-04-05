@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/search-documents": "^12.2.0",
     "@google/genai": "^1.48.0",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",

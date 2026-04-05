@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const { createIndexIfNotExists } = require('./services/search');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,8 +22,13 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/news-predic
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(() => {
+  console.log('MongoDB connected successfully');
+  // Initialize Azure AI Search index
+  return createIndexIfNotExists();
+})
+.then(() => console.log('Azure AI Search initialized'))
+.catch(err => console.error('Initialization error:', err));
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

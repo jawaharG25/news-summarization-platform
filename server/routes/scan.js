@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { scrapeArticle } = require('../services/scraper');
 const { analyzeArticle, generateEmbedding } = require('../services/ai');
+const { indexArticle } = require('../services/search');
 const Article = require('../models/Article');
 
 // @route POST /api/scan
@@ -41,6 +42,11 @@ router.post('/scan', async (req, res) => {
     });
 
     await newArticle.save();
+
+    // 5. Index in Azure AI Search (async, don't wait)
+    indexArticle(newArticle).catch(err => 
+      console.error('Search indexing failed:', err.message)
+    );
 
     return res.status(201).json({ message: 'Scan successful', data: newArticle });
 
