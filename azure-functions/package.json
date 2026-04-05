@@ -1,0 +1,16 @@
+{
+  "name": "newslens-scraper-functions",
+  "version": "1.0.0",
+  "description": "Azure Function for scraping news articles",
+  "main": "index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests specified\""
+  },
+  "dependencies": {
+    "puppeteer": "^23.11.1"
+  },
+  "devDependencies": {
+    "@azure/functions": "^4.0.0"
+  }
+}
